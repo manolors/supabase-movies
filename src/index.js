@@ -43,9 +43,16 @@ loadButton.addEventListener("click", () => {
 
 const loadMovies = document.getElementById("load-movies");
 
-loadMovies.addEventListener("click", () => {
+loadMovies.addEventListener("click", async () => {
   // añadir el código para mostrar las peliculas
   // puedes usar la función renderMovie para ayudarte a renderizarlas
+});
+
+const searchMovie = document.getElementById("search-button");
+searchMovie.addEventListener("click", async () => {
+  const searchTitle = document.getElementById("search-title");
+
+  // añadir el código para buscar por titulo
 });
 
 function renderMovie(movie) {
