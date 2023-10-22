@@ -18,41 +18,65 @@ async function login() {
 await login();
 const messageContainer = document.querySelector(".message");
 const clearButton = document.getElementById("clear");
-clearButton.addEventListener("click", () => { messageContainer.innerHTML = ""; });
+clearButton.addEventListener("click", () => {
+  messageContainer.innerHTML = "";
+});
 
 const loadButton = document.getElementById("load-data");
 
 loadButton.addEventListener("click", () => {
   fetch("./movies.json")
-    .then(data => data.json())
+    .then((data) => data.json())
+    .then((data) => data.movies)
     .then((data) => {
-      data = data.movies;
       for (const movie of data) {
-        supabase.from("movies").insert([movie])
-          .then(response => {
+        supabase
+          .from("movies")
+          .insert([movie])
+          .then((response) => {
             if (response.status >= 200 && response.status < 300) {
               messageContainer.innerHTML += `<p>Película ${movie.title} insertada correctamente</p>`;
             } else {
               messageContainer.innerHTML += `<p>Error al insertar la película ${movie.title} [${response.error.message}]</p>`;
             }
           })
-          .catch(error => { messageContainer.innerHTML += `<p>${error}</p>`; });
+          .catch((error) => {
+            messageContainer.innerHTML += `<p>${error}</p>`;
+          });
       }
-    }).catch(error => { messageContainer.innerHTML += `<p>${error}</p>`; });
+    })
+    .catch((error) => {
+      messageContainer.innerHTML += `<p>${error}</p>`;
+    });
 });
 
 const loadMovies = document.getElementById("load-movies");
 
 loadMovies.addEventListener("click", async () => {
-  // añadir el código para mostrar las peliculas
-  // puedes usar la función renderMovie para ayudarte a renderizarlas
+  const { data: movies, error } = await supabase.from("movies").select("*");
+  if (!error) {
+    for (const movie of movies) {
+      messageContainer.innerHTML += renderMovie(movie);
+    }
+  } else {
+    messageContainer.innerHTML += `<p>${error}</p>`;
+  }
 });
 
 const searchMovie = document.getElementById("search-button");
 searchMovie.addEventListener("click", async () => {
   const searchTitle = document.getElementById("search-title");
-
-  // añadir el código para buscar por titulo
+  const { data: movies, error } = await supabase
+    .from("movies")
+    .select("*")
+    .eq("title", searchTitle.value);
+  if (!error) {
+    for (const movie of movies) {
+      messageContainer.innerHTML += renderMovie(movie);
+    }
+  } else {
+    messageContainer.innerHTML += `<p>${error}</p>`;
+  }
 });
 
 function renderMovie(movie) {
@@ -74,4 +98,27 @@ function renderMovie(movie) {
       </object>
       <img src=>
     </div><hr>`;
+}
+
+supabase
+  .channel("custom-delete-channel")
+  .on(
+    "postgres_changes",
+    { event: "DELETE", schema: "public", table: "movies" },
+    (payload) => {
+      deleteMovie(payload);
+    }
+  )
+  .subscribe();
+
+function deleteMovie(payload) {
+  console.log(payload);
+  console.log(payload.old);
+  const idToDelete = payload?.old?.id || false;
+
+  if (idToDelete) {
+    const movie = document.getElementById(`movie-${idToDelete}`);
+    movie.classList.add("removed");
+    setTimeout(() => movie.remove(), 1000);
+  }
 }

@@ -2,3 +2,11 @@
 .poster-url {
   max-width: 150px;
 }
+
+.movie {
+  transition: opacity 1s;
+}
+
+.removed {
+  opacity: 0%;
+}
