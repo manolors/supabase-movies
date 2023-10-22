@@ -17,6 +17,8 @@ async function login() {
 
 await login();
 const messageContainer = document.querySelector(".message");
+const moviesContainer = document.querySelector(".movies");
+
 const clearButton = document.getElementById("clear");
 clearButton.addEventListener("click", () => {
   messageContainer.innerHTML = "";
@@ -55,8 +57,9 @@ const loadMovies = document.getElementById("load-movies");
 loadMovies.addEventListener("click", async () => {
   const { data: movies, error } = await supabase.from("movies").select("*");
   if (!error) {
+    moviesContainer.innerHTML = "";
     for (const movie of movies) {
-      messageContainer.innerHTML += renderMovie(movie);
+      moviesContainer.innerHTML += renderMovie(movie);
     }
   } else {
     messageContainer.innerHTML += `<p>${error}</p>`;
@@ -69,10 +72,11 @@ searchMovie.addEventListener("click", async () => {
   const { data: movies, error } = await supabase
     .from("movies")
     .select("*")
-    .eq("title", searchTitle.value);
+    .ilike("title", `%${searchTitle.value}%`);
   if (!error) {
+    moviesContainer.innerHTML = "";
     for (const movie of movies) {
-      messageContainer.innerHTML += renderMovie(movie);
+      moviesContainer.innerHTML += renderMovie(movie);
     }
   } else {
     messageContainer.innerHTML += `<p>${error}</p>`;
@@ -80,24 +84,23 @@ searchMovie.addEventListener("click", async () => {
 });
 
 function renderMovie(movie) {
-  let genresHtml = "";
+  const genresHtml = [];
   for (const genre of movie.genres) {
-    genresHtml += `<li>${genre}</li>`;
+    genresHtml.push(` <span class="genre">${genre}</span>`);
   }
   return `
     <div class="movie" id="movie-${movie.id}">
       <div class="title">${movie.title} <span>(${movie.year})</span></div>
       <div class="directed-by">Directed by: ${movie.director}</div>
-      <div>Genres:</div>
-      <ul class="genres">
+      <div class="genres">
         ${genresHtml}
-      </ul>
+      </div>
       <p class="plot">${movie.plot}</p>
       <object class="poster-url" data="${movie.posterUrl}">
         <img src="icon-image-not-found-free-vector.jpg" />
       </object>
       <img src=>
-    </div><hr>`;
+    </div>`;
 }
 
 supabase

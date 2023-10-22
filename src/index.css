@@ -4,7 +4,28 @@
 }
 
 .movie {
+  margin: 5px;
+  padding: 1em;
+  font-family: system-ui;
+  max-width: 300px;
   transition: opacity 1s;
+  border-radius: 5px;
+  text-align: center;
+  box-shadow: rgb(50 50 93 / 25%) 0 2px 5px -1px, rgb(0 0 0 / 30%) 0 1px 3px -1px;
+}
+
+.movie .title {
+  font-size: 1.5em;
+}
+
+.movie .genre {
+  font-size: 0.8em;
+  font-style: italic;
+}
+
+.movies {
+  display: flex;
+  flex-flow: row wrap;
 }
 
 .removed {
