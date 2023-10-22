@@ -17,9 +17,13 @@ async function login() {
 
 await login();
 const messageContainer = document.querySelector(".message");
-const clearButton = document.getElementById("clear");
-clearButton.addEventListener("click", () => { messageContainer.innerHTML = ""; });
+const moviesContainer = document.querySelector(".movies");
 
+const clearButton = document.getElementById("clear");
+clearButton.addEventListener("click", () => {
+  messageContainer.innerHTML = "";
+  moviesContainer.innerHTML = "";
+});
 const loadButton = document.getElementById("load-data");
 
 loadButton.addEventListener("click", () => {
@@ -42,10 +46,8 @@ loadButton.addEventListener("click", () => {
 });
 
 const loadMovies = document.getElementById("load-movies");
-
 loadMovies.addEventListener("click", async () => {
-  // añadir el código para mostrar las peliculas
-  // puedes usar la función renderMovie para ayudarte a renderizarlas
+
 });
 
 const searchMovie = document.getElementById("search-button");
@@ -56,22 +58,21 @@ searchMovie.addEventListener("click", async () => {
 });
 
 function renderMovie(movie) {
-  let genresHtml = "";
+  const genresHtml = [];
   for (const genre of movie.genres) {
-    genresHtml += `<li>${genre}</li>`;
+    genresHtml.push(` <span class="genre">${genre}</span>`);
   }
   return `
     <div class="movie" id="movie-${movie.id}">
       <div class="title">${movie.title} <span>(${movie.year})</span></div>
       <div class="directed-by">Directed by: ${movie.director}</div>
-      <div>Genres:</div>
-      <ul class="genres">
+      <div class="genres">
         ${genresHtml}
-      </ul>
+      </div>
       <p class="plot">${movie.plot}</p>
       <object class="poster-url" data="${movie.posterUrl}">
         <img src="icon-image-not-found-free-vector.jpg" />
       </object>
       <img src=>
-    </div><hr>`;
+    </div>`;
 }
