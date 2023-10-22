@@ -20,6 +20,7 @@
   "keywords": [],
   "license": "ISC",
   "dependencies": {
-    "@supabase/supabase-js": "^2.38.2"
+    "@supabase/supabase-js": "^2.38.2",
+    "fs": "^0.0.1-security"
   }
 }
