@@ -22,10 +22,10 @@ const moviesContainer = document.querySelector(".movies");
 const clearButton = document.getElementById("clear");
 clearButton.addEventListener("click", () => {
   messageContainer.innerHTML = "";
+  moviesContainer.innerHTML = "";
 });
 
 const loadButton = document.getElementById("load-data");
-
 loadButton.addEventListener("click", () => {
   fetch("./movies.json")
     .then((data) => data.json())
@@ -53,7 +53,6 @@ loadButton.addEventListener("click", () => {
 });
 
 const loadMovies = document.getElementById("load-movies");
-
 loadMovies.addEventListener("click", async () => {
   const { data: movies, error } = await supabase.from("movies").select("*");
   if (!error) {
