@@ -1,67 +1,25 @@
-import { createClient } from "@supabase/supabase-js";
+// Import the functions you need from the SDKs you need
+import { initializeApp } from "firebase/app";
+import { get, getDatabase, ref, set, child } from "firebase/database";
 
-const SUPABASE_URL = import.meta.env.VITE_SUPABASE_URL || false;
-const SUPABASE_SECRET = import.meta.env.VITE_SUPABASE_SECRET || false;
-const supabase = createClient(SUPABASE_URL, SUPABASE_SECRET);
+// TODO: Add SDKs for Firebase products that you want to use
+// https://firebase.google.com/docs/web/setup#available-libraries
 
-await checkUserLogged();
+// Your web app's Firebase configuration
+const firebaseConfig = {
+  apiKey: import.meta.env.VITE_APIKEY || false,
+  authDomain: import.meta.env.VITE_AUTHDOMAIN || false,
+  databaseURL: import.meta.env.VITE_DATABASEURL || false,
+  projectId: import.meta.env.VITE_PROJECTID || false,
+  storageBucket: import.meta.env.VITE_STORAGEBUCKET || false,
+  messagingSenderId: import.meta.env.VITE_MESSAGINGSENDERID || false,
+  appId: import.meta.env.VITE_APPID || false,
+};
 
-const logoutButton = document.querySelector("input[name=logout]");
-logoutButton.addEventListener("click", await logout);
+// Initialize Firebase
+const app = initializeApp(firebaseConfig);
 
-const loginButton = document.querySelector("input[name=login]");
-loginButton.addEventListener("click", await login);
-
-async function checkUserLogged() {
-  const { data, error } = await supabase.auth.getSession();
-  if (error) {
-    console.error(error);
-    return;
-  }
-  if (!data.session) {
-    showLoginForm();
-    return;
-  }
-  console.log(data.session.user.email);
-  const userLogged = document.querySelector(".logged-user");
-  userLogged.innerText = `(${data.session.user.email})`;
-  hideLoginForm();
-}
-
-function showLoginForm() {
-  const loginForm = document.querySelector(".login-form");
-  loginForm.classList.add("active");
-
-  const logoutForm = document.querySelector(".logout-form");
-  logoutForm.classList.remove("active");
-}
-
-function hideLoginForm() {
-  const loginForm = document.querySelector(".login-form");
-  loginForm.classList.remove("active");
-  const logoutForm = document.querySelector(".logout-form");
-  logoutForm.classList.add("active");
-}
-
-async function logout(e) {
-  console.log("loggin out!");
-  e.preventDefault();
-  await supabase.auth.signOut();
-  checkUserLogged();
-}
-
-async function login(e) {
-  e.preventDefault();
-  const email = document.querySelector("input[name=email]").value || false;
-  const password = document.querySelector("input[name=password]").value || false;
-  const { data, error } = await supabase.auth.signInWithPassword({ email, password });
-  if (!error) {
-    console.log(`Usuario logeado correctamente:${JSON.stringify(data)}`);
-  } else {
-    console.error(error);
-  }
-  checkUserLogged();
-}
+const db = getDatabase(app);
 
 const messageContainer = document.querySelector(".message");
 const moviesContainer = document.querySelector(".movies");
@@ -80,31 +38,33 @@ function ImportMovies() {
     .then((data) => {
       data = data.movies;
       for (const movie of data) {
-        supabase.from("movies").insert([movie])
-          .then(response => {
-            if (response.status >= 200 && response.status < 300) {
-              messageContainer.innerHTML += `<p>Película ${movie.title} insertada correctamente</p>`;
-            } else {
-              messageContainer.innerHTML += `<p>Error al insertar la película ${movie.title} [${response.error.message}]</p>`;
-            }
-          })
-          .catch(error => { messageContainer.innerHTML += `<p>${error}</p>`; });
+        let title = movie.title;
+        title = title.replace(/\.|\s|#|\$|\[|\]|&|'|·|:|-/ig, "").toLowerCase();
+        set(ref(db, `movies/${title}`), movie).then(() => {
+          messageContainer.innerHTML += `<p>Película ${movie.title} insertada correctamente</p>`;
+        }).catch((e) => {
+          messageContainer.innerHTML += `<p>Error al insertar la película ${movie.title}: ${e}</p>`;
+        });
       }
     }).catch(error => { messageContainer.innerHTML += `<p>${error}</p>`; });
 }
 
 const showMovies = document.getElementById("show-movies");
 showMovies.addEventListener("click", async () => {
-  // añadir código para mostrar las películas cargándolas de supabase
+  const dbref = ref(db);
+  get(child(dbref, "movies")).then((snapshot) => {
+    if (snapshot.exists()) {
+      const movies = snapshot.val();
+      for (const movie of Object.keys(movies)) {
+        moviesContainer.innerHTML += renderMovie(movies[movie]);
+      }
+    } else {
+      console.log("No data available");
+    }
+  }).catch((error) => {
+    console.error(error);
+  });
 });
-
-const searchMovie = document.getElementById("search-button");
-searchMovie.addEventListener("click", await searchByTitle);
-
-async function searchByTitle() {
-  const searchTitle = document.getElementById("search-title");
-  // añadir código para buscar la película en supabase por titulo
-}
 
 function renderMovie(movie) {
   const genresHtml = [];
