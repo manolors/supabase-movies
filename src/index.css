@@ -31,3 +31,21 @@
 .removed {
   opacity: 0%;
 }
+
+.login-form {
+  display: none;
+  margin-bottom: 1em;
+}
+
+.active {
+  display: block;
+}
+
+.logout-form {
+  display: none;
+  margin-bottom: 1em;
+}
+
+.logout-form.active {
+  display: block;
+}

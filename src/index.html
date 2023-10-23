@@ -11,9 +11,18 @@
 </head>
 
 <body>
+  <form class="login-form">
+    <input type="text" name="email" placeholder="email" required>
+    <input type="password" name="password" placeholder="password" required>
+    <input type="submit" value="Login" name="login">
+  </form>
+  <form class="logout-form">
+    <span class="logged-user"></span>
+    <input type="submit" value="Logout" name="logout">
+  </form>
   <div>
     <button id="load-data">Importar películas</button>
-    <button id="load-movies">Mostrar películas</button>
+    <button id="show-movies">Mostrar películas</button>
     <button id="clear">Limpiar</button>
   </div>
   <hr>

@@ -4,29 +4,78 @@ const SUPABASE_URL = import.meta.env.VITE_SUPABASE_URL || false;
 const SUPABASE_SECRET = import.meta.env.VITE_SUPABASE_SECRET || false;
 const supabase = createClient(SUPABASE_URL, SUPABASE_SECRET);
 
-async function login() {
-  const email = "";
-  const password = "";
-  const { data, error } = supabase.auth.signInWithPassword({ email, password });
+const logoutButton = document.querySelector("input[name=logout]");
+logoutButton.addEventListener("click", await logout);
+
+const loginButton = document.querySelector("input[name=login]");
+loginButton.addEventListener("click", await login);
+
+async function checkUserLogged() {
+  const { data, error } = await supabase.auth.getSession();
+  if (error) {
+    console.error(error);
+    return;
+  }
+  if (!data.session) {
+    showLoginForm();
+    return;
+  }
+  console.log(data.session.user.email);
+  const userLogged = document.querySelector(".logged-user");
+  userLogged.innerText = `(${data.session.user.email})`;
+  hideLoginForm();
+}
+
+function showLoginForm() {
+  const loginForm = document.querySelector(".login-form");
+  loginForm.classList.add("active");
+
+  const logoutForm = document.querySelector(".logout-form");
+  logoutForm.classList.remove("active");
+}
+
+function hideLoginForm() {
+  const loginForm = document.querySelector(".login-form");
+  loginForm.classList.remove("active");
+  const logoutForm = document.querySelector(".logout-form");
+  logoutForm.classList.add("active");
+}
+
+async function logout(e) {
+  console.log("loggin out!");
+  e.preventDefault();
+  await supabase.auth.signOut();
+  checkUserLogged();
+}
+
+async function login(e) {
+  e.preventDefault();
+  const email = document.querySelector("input[name=email]").value || false;
+  const password = document.querySelector("input[name=password]").value || false;
+  const { data, error } = await supabase.auth.signInWithPassword({ email, password });
   if (!error) {
-    console.log(data);
+    console.log(`Usuario logeado correctamente:${JSON.stringify(data)}`);
   } else {
     console.error(error);
   }
+  checkUserLogged();
 }
 
-await login();
+await checkUserLogged();
+
 const messageContainer = document.querySelector(".message");
 const moviesContainer = document.querySelector(".movies");
-
 const clearButton = document.getElementById("clear");
+
 clearButton.addEventListener("click", () => {
   messageContainer.innerHTML = "";
   moviesContainer.innerHTML = "";
 });
-const loadButton = document.getElementById("load-data");
 
-loadButton.addEventListener("click", () => {
+const loadButton = document.getElementById("load-data");
+loadButton.addEventListener("click", ImportMovies);
+
+function ImportMovies() {
   fetch("./movies.json")
     .then(data => data.json())
     .then((data) => {
@@ -43,11 +92,11 @@ loadButton.addEventListener("click", () => {
           .catch(error => { messageContainer.innerHTML += `<p>${error}</p>`; });
       }
     }).catch(error => { messageContainer.innerHTML += `<p>${error}</p>`; });
-});
+}
 
-const loadMovies = document.getElementById("load-movies");
-loadMovies.addEventListener("click", async () => {
-
+const showMovies = document.getElementById("show-movies");
+showMovies.addEventListener("click", async () => {
+  // añadir código para mostrar las películas cargándolas de supabase
 });
 
 const searchMovie = document.getElementById("search-button");
