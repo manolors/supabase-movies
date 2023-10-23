@@ -4,6 +4,8 @@ const SUPABASE_URL = import.meta.env.VITE_SUPABASE_URL || false;
 const SUPABASE_SECRET = import.meta.env.VITE_SUPABASE_SECRET || false;
 const supabase = createClient(SUPABASE_URL, SUPABASE_SECRET);
 
+await checkUserLogged();
+
 const logoutButton = document.querySelector("input[name=logout]");
 logoutButton.addEventListener("click", await logout);
 
@@ -61,12 +63,9 @@ async function login(e) {
   checkUserLogged();
 }
 
-await checkUserLogged();
-
 const messageContainer = document.querySelector(".message");
 const moviesContainer = document.querySelector(".movies");
 const clearButton = document.getElementById("clear");
-
 clearButton.addEventListener("click", () => {
   messageContainer.innerHTML = "";
   moviesContainer.innerHTML = "";
@@ -100,11 +99,12 @@ showMovies.addEventListener("click", async () => {
 });
 
 const searchMovie = document.getElementById("search-button");
-searchMovie.addEventListener("click", async () => {
-  const searchTitle = document.getElementById("search-title");
+searchMovie.addEventListener("click", await searchByTitle);
 
-  // añadir el código para buscar por titulo
-});
+async function searchByTitle() {
+  const searchTitle = document.getElementById("search-title");
+  // añadir código para buscar la película en supabase por titulo
+}
 
 function renderMovie(movie) {
   const genresHtml = [];
