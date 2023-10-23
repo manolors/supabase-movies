@@ -95,7 +95,15 @@ function ImportMovies() {
 
 const showMovies = document.getElementById("show-movies");
 showMovies.addEventListener("click", async () => {
-  // añadir código para mostrar las películas cargándolas de supabase
+  const { data: movies, error } = await supabase.from("movies").select("*");
+  if (!error) {
+    moviesContainer.innerHTML = "";
+    for (const movie of movies) {
+      moviesContainer.innerHTML += renderMovie(movie);
+    }
+  } else {
+    messageContainer.innerHTML += `<p>${error}</p>`;
+  }
 });
 
 const searchMovie = document.getElementById("search-button");
@@ -103,7 +111,18 @@ searchMovie.addEventListener("click", await searchByTitle);
 
 async function searchByTitle() {
   const searchTitle = document.getElementById("search-title");
-  // añadir código para buscar la película en supabase por titulo
+  const { data: movies, error } = await supabase
+    .from("movies")
+    .select("*")
+    .ilike("title", `%${searchTitle.value}%`);
+  if (!error) {
+    moviesContainer.innerHTML = "";
+    for (const movie of movies) {
+      moviesContainer.innerHTML += renderMovie(movie);
+    }
+  } else {
+    messageContainer.innerHTML += `<p>${error}</p>`;
+  }
 }
 
 function renderMovie(movie) {
@@ -125,3 +144,26 @@ function renderMovie(movie) {
       <img src=>
     </div>`;
 }
+
+supabase
+  .channel("custom-delete-channel")
+  .on(
+    "postgres_changes",
+    { event: "DELETE", schema: "public", table: "movies" },
+    (payload) => {
+      deleteMovie(payload);
+    }
+  )
+  .subscribe();
+
+function deleteMovie(payload) {
+  const idToDelete = payload?.old?.id || false;
+
+  if (idToDelete) {
+    const movie = document.getElementById(`movie-${idToDelete}`);
+    movie.classList.add("removed");
+    setTimeout(() => movie.remove(), 1000);
+  }
+}
+
+// añadir código para actualizar en tiempo real la ficha de una película
